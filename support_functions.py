@@ -15,7 +15,10 @@ class WaterPenetration(Penetration, ABC):
         pass
 
     def __call__(self, s: float):
-        return s
+        return s ** 2
+
+    def der(self, s: float):
+        return 2 * s
 
 
 class OilPenetration(Penetration, ABC):
@@ -23,7 +26,10 @@ class OilPenetration(Penetration, ABC):
         pass
 
     def __call__(self, s: float):
-        return 1 - s
+        return (1 - s) ** 2
+
+    def der(self, s: float):
+        return -2 * (1 - s)
 
 
 class FiltrationFunction:
@@ -37,3 +43,11 @@ class FiltrationFunction:
         return self.k_water(s) / (
                 self.k_water(s) + (self.mu_water / self.mu_oil) * self.k_oil(s)
         )
+
+    def der(self, s: float):
+        mu = (self.mu_water / self.mu_oil)
+        tmp1 = self.k_water.der(s) * (self.k_water(s) + mu * self.k_oil(s))
+        tmp2 = self.k_water(s) * (self.k_water.der(s) + mu * self.k_oil.der(s))
+        tmp3 = tmp1 - tmp2
+        tmp4 = (self.k_water(s) + mu * self.k_oil(s)) ** 2
+        return tmp3 / tmp4
